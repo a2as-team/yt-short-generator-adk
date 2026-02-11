@@ -1,0 +1,329 @@
+manifest:
+  version: "0.1.3"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: krishgaur1354/yt-short-generator-adk
+    source: https://github.com/krishgaur1354/yt-short-generator-adk
+    branch: main
+    commit: "0d72e270"
+    scope: [image_search.py, script_generator.py, src/api/youtube.py, src/utils/images.py, src/utils/script.py, src/video/generator.py,
+      video_generator.py, youtube_uploader.py]
+  issued:
+    by: A2AS.org
+    at: '2026-02-11T16:39:58Z'
+    url: https://a2as.org/certified/agents/krishgaur1354/yt-short-generator-adk
+  signatures:
+    digest: sha256:MG6THUNd6_-GnX-mJrREYwG3pVMBWsVtd7Osq6YawwI
+    key: ed25519:rWsn8RZtsDRUBYBKOLcA9gU7ideBnk1CVUmSoBLbSe4
+    sig: ed25519:kPIGFBVOPYi38rc_sVL4d-GgpP-HEibHv2InivTYeKkMmtmaJtXSA4HwFuYpkoGe19d5xG6rAhj-BE2aQ7cXAQ
+
+agents:
+  agent.0:
+    type: instance
+    tools: [script_tool, tts_tool, image_search_tool, text_image_tool, video_tool, WebSearchTool]
+    params:
+      workflow: video_generation_workflow
+      function: generate_youtube_short
+      instance: agent
+  agent.1:
+    type: instance
+    tools: [script_tool, tts_tool, image_search_tool, text_image_tool, video_tool, WebSearchTool]
+    params:
+      workflow: video_generation_workflow
+      function: generate_youtube_short
+      instance: agent
+  generator.1:
+    type: instance
+    models: [gemini-pro]
+    tools: [WebSearchTool]
+    params:
+      config: ''
+      class: ScriptGenerator
+      instance: agent.ScriptGenerator.agent
+  generator.agent:
+    type: instance
+    models: [gemini-pro]
+    tools: [WebSearchTool]
+    params:
+      config: ''
+      class: ScriptGenerator
+
+models:
+  gemini-pro:
+    type: literal
+    agents: [generator.agent, generator.1]
+
+tools:
+  image_search_tool:
+    type: function
+    agents: [agent.0, agent.1]
+  script_tool:
+    type: function
+    agents: [agent.0, agent.1]
+  text_image_tool:
+    type: function
+    agents: [agent.0, agent.1]
+  tts_tool:
+    type: function
+    agents: [agent.0, agent.1]
+  video_tool:
+    type: function
+    agents: [agent.0, agent.1]
+
+imports:
+  Agent: google.adk.Agent
+  Any: typing.Any
+  Application: telegram.ext.Application
+  asyncio: asyncio
+  AudioFileClip: moviepy.editor.AudioFileClip
+  build: googleapiclient.discovery.build
+  CommandHandler: telegram.ext.CommandHandler
+  concatenate_videoclips: moviepy.editor.concatenate_videoclips
+  ContextTypes: telegram.ext.ContextTypes
+  ConversationHandler: telegram.ext.ConversationHandler
+  credentials: google.oauth2.credentials
+  datetime: datetime
+  Dict: typing.Dict
+  filters: telegram.ext.filters
+  FunctionTool: google.adk.tool.FunctionTool
+  generate_youtube_short: src.video.generator.generate_youtube_short
+  get_enhanced_script: src.utils.script.get_enhanced_script
+  gTTS: gtts.gTTS
+  Image: PIL.Image
+  ImageDraw: PIL.ImageDraw
+  ImageFont: PIL.ImageFont
+  ImageSequenceClip: moviepy.editor.ImageSequenceClip
+  InstalledAppFlow: google_auth_oauthlib.flow.InstalledAppFlow
+  json: json
+  List: typing.List
+  LlmAgent: google.adk.LlmAgent
+  load_dotenv: dotenv.load_dotenv
+  logging: logging
+  MediaFileUpload: googleapiclient.http.MediaFileUpload
+  MessageHandler: telegram.ext.MessageHandler
+  Optional: typing.Optional
+  os: os
+  Path: pathlib.Path
+  pickle: pickle
+  quote: urllib.parse.quote
+  Request: google.auth.transport.requests.Request
+  requests: requests
+  search_images_online: src.utils.images.search_images_online
+  SequentialAgent: google.adk.SequentialAgent
+  tempfile: tempfile
+  Update: telegram.Update
+  upload_to_youtube: src.api.youtube.upload_to_youtube
+  WebSearchTool: google.adk.tool.google.WebSearchTool
+
+functions:
+  __init__:
+    type: sync
+    module: script_generator
+    args: [self, api_key]
+  _register_handlers:
+    type: sync
+    module: telegram_bot
+    args: [self]
+  _send_to_n8n_webhook:
+    type: sync
+    module: telegram_bot
+    args: [self, title, description, video_url]
+  cancel:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: int
+  create_text_image:
+    type: async
+    module: src.video.generator
+    args: [text, output_path]
+    params:
+      returns: str
+  create_video:
+    type: async
+    module: src.video.generator
+    args: [image_paths, audio_path, output_path]
+    params:
+      returns: str
+  create_video_start:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: int
+  generate_script:
+    type: async
+    module: script_generator
+    args: [self, title, description, duration_seconds]
+    params:
+      returns: str
+  generate_youtube_short:
+    type: async
+    module: src.video.generator
+    args: [title, description]
+    params:
+      returns: str
+  get_description:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: int
+  get_enhanced_script:
+    type: async
+    module: script_generator
+    args: [title, description]
+    params:
+      returns: str
+  get_title:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: int
+  get_youtube_credentials:
+    type: sync
+    module: youtube_uploader
+  help_command:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: None
+  process_video_request:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: None
+  run:
+    type: sync
+    module: telegram_bot
+    args: [self]
+  search_images:
+    type: async
+    module: src.video.generator
+    args: [query, num_images]
+    params:
+      returns: List[str]
+  search_images_online:
+    type: async
+    module: image_search
+    args: [query, num_images, api_key]
+    params:
+      returns: List[str]
+  send_to_n8n_webhook:
+    type: sync
+    module: src.api.youtube
+    args: [data]
+  start:
+    type: async
+    module: telegram_bot
+    args: [self, update, context]
+    params:
+      returns: None
+  text_to_speech:
+    type: async
+    module: src.video.generator
+    args: [script, output_path]
+    params:
+      returns: str
+  upload_to_youtube:
+    type: async
+    module: youtube_uploader
+    args: [video_path, title, description, tags, category_id]
+    params:
+      returns: str
+  video_generation_workflow:
+    type: async
+    module: src.video.generator
+    args: [agent_input]
+    params:
+      returns: Dict
+
+variables:
+  GOOGLE_API_KEY:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [src.utils.images, src.utils.script, config.env]
+  N8N_WEBHOOK_URL:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [config.env]
+  TELEGRAM_BOT_TOKEN:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [config.env]
+  UNSPLASH_ACCESS_KEY:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [src.utils.images, config.env]
+  YOUTUBE_CLIENT_SECRET_FILE:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [config.env]
+  YOUTUBE_CREDENTIALS_FILE:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [config.env]
+
+files:
+  audio_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [os.path.exists]
+  img_path:
+    type: variable
+    actions: [write, read]
+    params:
+      caller: [open, img.save, os.path.exists]
+      alias: [f]
+  narration.mp3:
+    type: pattern
+    actions: [read]
+    params:
+      caller: [os.path.join]
+      pattern: [workspace_dir, narration.mp3]
+  output_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [tts.save, image.save]
+  video_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [os.path.exists]
+  youtube_credentials.json:
+    type: variable
+    actions: [read, write]
+    params:
+      caller: [os.path.exists, open, pickle.load]
+
+networks:
+  api.unsplash.com:
+    type: api
+    actions: [GET]
+    urls: ['/{...}']
+    protocols: [https]
+    ports: ["443"]
+    params:
+      pattern: https://api.unsplash.com/photos/random?query={encoded_query}&count={num_images}
+      caller: [search_images_online]
+  youtube.com:
+    type: api
+    actions: [GET]
+    urls: ['/{...}']
+    protocols: [https]
+    ports: ["443"]
+    params:
+      pattern: https://youtube.com/shorts/{video_id}
+      caller: [upload_to_youtube]
